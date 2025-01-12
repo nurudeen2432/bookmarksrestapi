@@ -51,3 +51,13 @@ class Bookmark(db.Model):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.short_url=self.generate_short_character()
+
+# class Character:
+#     def __init__(self, name):
+#         self.name = name
+
+#     def generate_short_url(self):
+#         return self.name[:3]
+# char = Character("Alexandar")
+
+# print(char.generate_short_url())

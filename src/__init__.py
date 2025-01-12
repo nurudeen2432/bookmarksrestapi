@@ -1,14 +1,13 @@
 # The __init__.py file can contain initialization code that runs when the package is imported.
 # It is used to structure and organize submodules or subpackages within a package.
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect
 import os
 from dotenv import load_dotenv
-
 from src.auth import auth
 from src.bookmarks import bookmarks
-
-from src.database import db
+from src.database import db, Bookmark
+from flask_jwt_extended import JWTManager
 
 
 
@@ -24,7 +23,8 @@ def create_app(test_config=None):
 
             SECRET_KEY=os.environ.get("SECRET_KEY", "default_secret_key"),
             SQLALCHEMY_DATABASE_URI= os.environ.get("SQLALCHEMY_DATABASE_URI"),
-            SQLALCHEMY_TRACK_MODIFICATION = False
+            SQLALCHEMY_TRACK_MODIFICATION = False,
+            JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY')
             
 
         )
@@ -33,8 +33,22 @@ def create_app(test_config=None):
         
     db.app=app
     db.init_app(app)
+    JWTManager(app)
+
     app.register_blueprint(auth)
     app.register_blueprint(bookmarks)
+
+
+    @app.get('/<short_url>')
+    def redirect_to_url(short_url):
+        bookmark=Bookmark.query.filter_by(short_url=short_url).first_or_404()
+
+        if bookmark:
+            bookmark.visits +=1
+            db.session.commit()
+
+            return redirect(bookmark.url)
+
 
 
     return app
