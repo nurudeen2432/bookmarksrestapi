@@ -1,5 +1,5 @@
 FLASK_APP=src
-FLASK_ENV=development
+FLASK_ENV=production
 SQLALCHEMY_DATABASE_URI=sqlite:///bookmarks.db
 
 JWT_SECRET_KEY='JWT_SECRET_KEY'

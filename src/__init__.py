@@ -20,12 +20,17 @@ load_dotenv()
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True) # tells flask we might have some config outside file
 
+    instance_path = app.instance_path
+
+    if not os.path.exists(instance_path):
+        os.makedirs(instance_path)
+
     if test_config is None:
         
         app.config.from_mapping(
 
             SECRET_KEY=os.environ.get("SECRET_KEY", "default_secret_key"),
-            SQLALCHEMY_DATABASE_URI= os.environ.get("SQLALCHEMY_DATABASE_URI"),
+            SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI") or f"sqlite:///{os.path.join(instance_path, 'bookmarks.db')}",
             SQLALCHEMY_TRACK_MODIFICATION = False,
             JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY'),
             SWAGGER={
