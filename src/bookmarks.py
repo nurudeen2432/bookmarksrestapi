@@ -3,6 +3,7 @@ import validators
 from src.database import Bookmark, db
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_409_CONFLICT, HTTP_404_NOT_FOUND
+from flasgger import Swagger, swag_from
 
 
 bookmarks = Blueprint("bookmarks",__name__,url_prefix="/api/v1/bookmarks")
@@ -137,6 +138,28 @@ def edit_bookmark(id):
         'body':bookmark.body,
         'created_at':bookmark.created_at,
         'updated_at':bookmark.updated_at
+    }), HTTP_200_OK
+
+
+@bookmarks.get("/stats")
+@jwt_required()
+@swag_from('./docs/bookmarks/stats.yml')
+def get_stats():
+    current_user=get_jwt_identity()
+    data = []
+
+    items=Bookmark.query.filter_by(user_id=current_user).all()
+    for item in items:
+        new_link={
+            'visits':item.visits,
+            'url':item.url,
+            'id':item.id,
+            'short_url':item.short_url
+        }
+        data.append(new_link)
+
+    return jsonify({
+        'data': data
     }), HTTP_200_OK
     
 
